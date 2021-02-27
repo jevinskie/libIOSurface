@@ -6,9 +6,23 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import <VideoToolbox/VideoToolbox.h>
 
-@interface ViewController : NSViewController
+@interface ViewController : NSViewController <AVCaptureFileOutputRecordingDelegate> {
+    AVCaptureSession *mSession;
+    AVCaptureMovieFileOutput *mMovieFileOutput;
+    NSTimer *mTimer;
+    CGDisplayStreamRef dsref;
+    AVCaptureSession *captureSession;
+    AVCaptureScreenInput *si;
+    VTCompressionSessionRef csref;
+    AVAssetWriter *videoWriter;
+    AVAssetWriterInput* writerInput;
+}
 
+@property (weak) IBOutlet NSButton *captureButton;
+
+-(void)screenRecording:(NSURL *)destPath;
 
 @end
 

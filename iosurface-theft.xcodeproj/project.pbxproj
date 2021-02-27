@@ -12,7 +12,22 @@
 		0992BC9125E9931400D1B7B0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0992BC9025E9931400D1B7B0 /* Assets.xcassets */; };
 		0992BC9425E9931400D1B7B0 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0992BC9225E9931400D1B7B0 /* Main.storyboard */; };
 		0992BC9725E9931400D1B7B0 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 0992BC9625E9931400D1B7B0 /* main.m */; };
+		0992BCA025E9D5AD00D1B7B0 /* NSView+ImageRepresentation.m in Sources */ = {isa = PBXBuildFile; fileRef = 0992BC9F25E9D5AD00D1B7B0 /* NSView+ImageRepresentation.m */; };
+		0992BCA425EA06BC00D1B7B0 /* SkyLight.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0992BCA225EA06A100D1B7B0 /* SkyLight.framework */; };
+		0992BCAC25EA3A5800D1B7B0 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 0992BCAB25EA3A5800D1B7B0 /* main.m */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		0992BCA725EA3A5800D1B7B0 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		0992BC8725E9931400D1B7B0 /* iosurface-theft.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "iosurface-theft.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -25,10 +40,24 @@
 		0992BC9525E9931400D1B7B0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0992BC9625E9931400D1B7B0 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		0992BC9825E9931400D1B7B0 /* iosurface_theft.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = iosurface_theft.entitlements; sourceTree = "<group>"; };
+		0992BC9E25E9D5AD00D1B7B0 /* NSView+ImageRepresentation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSView+ImageRepresentation.h"; sourceTree = "<group>"; };
+		0992BC9F25E9D5AD00D1B7B0 /* NSView+ImageRepresentation.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSView+ImageRepresentation.m"; sourceTree = "<group>"; };
+		0992BCA225EA06A100D1B7B0 /* SkyLight.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SkyLight.framework; path = ../../../../../../System/Library/PrivateFrameworks/SkyLight.framework; sourceTree = "<group>"; };
+		0992BCA925EA3A5800D1B7B0 /* os_variant_has_internal_diagnostics */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = os_variant_has_internal_diagnostics; sourceTree = BUILT_PRODUCTS_DIR; };
+		0992BCAB25EA3A5800D1B7B0 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		0992BCB025EA3A5B00D1B7B0 /* os_variant_has_internal_diagnostics.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = os_variant_has_internal_diagnostics.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		0992BC8425E9931400D1B7B0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0992BCA425EA06BC00D1B7B0 /* SkyLight.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		0992BCA625EA3A5800D1B7B0 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -42,7 +71,9 @@
 			isa = PBXGroup;
 			children = (
 				0992BC8925E9931400D1B7B0 /* iosurface-theft */,
+				0992BCAA25EA3A5800D1B7B0 /* os_variant_has_internal_diagnostics */,
 				0992BC8825E9931400D1B7B0 /* Products */,
+				0992BCA125EA06A100D1B7B0 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -50,6 +81,7 @@
 			isa = PBXGroup;
 			children = (
 				0992BC8725E9931400D1B7B0 /* iosurface-theft.app */,
+				0992BCA925EA3A5800D1B7B0 /* os_variant_has_internal_diagnostics */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -66,8 +98,27 @@
 				0992BC9525E9931400D1B7B0 /* Info.plist */,
 				0992BC9625E9931400D1B7B0 /* main.m */,
 				0992BC9825E9931400D1B7B0 /* iosurface_theft.entitlements */,
+				0992BC9E25E9D5AD00D1B7B0 /* NSView+ImageRepresentation.h */,
+				0992BC9F25E9D5AD00D1B7B0 /* NSView+ImageRepresentation.m */,
 			);
 			path = "iosurface-theft";
+			sourceTree = "<group>";
+		};
+		0992BCA125EA06A100D1B7B0 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				0992BCA225EA06A100D1B7B0 /* SkyLight.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		0992BCAA25EA3A5800D1B7B0 /* os_variant_has_internal_diagnostics */ = {
+			isa = PBXGroup;
+			children = (
+				0992BCB025EA3A5B00D1B7B0 /* os_variant_has_internal_diagnostics.entitlements */,
+				0992BCAB25EA3A5800D1B7B0 /* main.m */,
+			);
+			path = os_variant_has_internal_diagnostics;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -90,6 +141,23 @@
 			productReference = 0992BC8725E9931400D1B7B0 /* iosurface-theft.app */;
 			productType = "com.apple.product-type.application";
 		};
+		0992BCA825EA3A5800D1B7B0 /* os_variant_has_internal_diagnostics */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0992BCAD25EA3A5800D1B7B0 /* Build configuration list for PBXNativeTarget "os_variant_has_internal_diagnostics" */;
+			buildPhases = (
+				0992BCA525EA3A5800D1B7B0 /* Sources */,
+				0992BCA625EA3A5800D1B7B0 /* Frameworks */,
+				0992BCA725EA3A5800D1B7B0 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = os_variant_has_internal_diagnostics;
+			productName = os_variant_has_internal_diagnostics;
+			productReference = 0992BCA925EA3A5800D1B7B0 /* os_variant_has_internal_diagnostics */;
+			productType = "com.apple.product-type.tool";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -99,6 +167,9 @@
 				LastUpgradeCheck = 1250;
 				TargetAttributes = {
 					0992BC8625E9931400D1B7B0 = {
+						CreatedOnToolsVersion = 12.5;
+					};
+					0992BCA825EA3A5800D1B7B0 = {
 						CreatedOnToolsVersion = 12.5;
 					};
 				};
@@ -117,6 +188,7 @@
 			projectRoot = "";
 			targets = (
 				0992BC8625E9931400D1B7B0 /* iosurface-theft */,
+				0992BCA825EA3A5800D1B7B0 /* os_variant_has_internal_diagnostics */,
 			);
 		};
 /* End PBXProject section */
@@ -138,9 +210,18 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0992BCA025E9D5AD00D1B7B0 /* NSView+ImageRepresentation.m in Sources */,
 				0992BC8F25E9931400D1B7B0 /* ViewController.m in Sources */,
 				0992BC9725E9931400D1B7B0 /* main.m in Sources */,
 				0992BC8C25E9931400D1B7B0 /* AppDelegate.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		0992BCA525EA3A5800D1B7B0 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0992BCAC25EA3A5800D1B7B0 /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -278,7 +359,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = ZK96P738ZR;
-				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_HARDENED_RUNTIME = NO;
 				INFOPLIST_FILE = "iosurface-theft/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -286,6 +367,10 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "vin.je.iosurface-theft";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SYSTEM_FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SYSTEM_LIBRARY_DIR)/PrivateFrameworks",
+				);
 			};
 			name = Debug;
 		};
@@ -298,13 +383,39 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = ZK96P738ZR;
-				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_HARDENED_RUNTIME = NO;
 				INFOPLIST_FILE = "iosurface-theft/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "vin.je.iosurface-theft";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SYSTEM_FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SYSTEM_LIBRARY_DIR)/PrivateFrameworks",
+				);
+			};
+			name = Release;
+		};
+		0992BCAE25EA3A5800D1B7B0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = os_variant_has_internal_diagnostics/os_variant_has_internal_diagnostics.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = ZK96P738ZR;
+				ENABLE_HARDENED_RUNTIME = NO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		0992BCAF25EA3A5800D1B7B0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = os_variant_has_internal_diagnostics/os_variant_has_internal_diagnostics.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = ZK96P738ZR;
+				ENABLE_HARDENED_RUNTIME = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -326,6 +437,15 @@
 			buildConfigurations = (
 				0992BC9C25E9931400D1B7B0 /* Debug */,
 				0992BC9D25E9931400D1B7B0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		0992BCAD25EA3A5800D1B7B0 /* Build configuration list for PBXNativeTarget "os_variant_has_internal_diagnostics" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0992BCAE25EA3A5800D1B7B0 /* Debug */,
+				0992BCAF25EA3A5800D1B7B0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

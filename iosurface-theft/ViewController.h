@@ -19,11 +19,15 @@
     AVAssetWriter *videoWriter;
     AVAssetWriterInput* writerInput;
     CMTimebaseRef tb;
+    int realWidth;
+    int realHeight;
+    int logicalWidth;
+    int logicalHeight;
+    CGFloat dpiScale;
 }
 
 @property (weak) IBOutlet NSButton *captureButton;
-
--(void)screenRecording:(NSURL *)destPath;
+@property AVMutableMetadataItem *dpiMeta;
 
 @end
 

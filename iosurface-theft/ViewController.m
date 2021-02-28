@@ -35,17 +35,41 @@ static const uint32_t kSLSCaptureIgnoreTCCPermissionsValue = (uint32_t)0x20000;
 static const uint32_t kSLSCaptureExcludeCursorWindow = (uint32_t)0x40000;
 static const uint32_t kSLSWorkspaceWindowsDoNotFilterDesktopPictureWindows = (uint32_t)(1UL << 31);
 
+//extern CFStringRef kFigMetadataBaseDataType_PixelDensity;
+//extern CFStringRef kFigQuickTimeMetadata_PixelDensityKey_WidthPixels;
+//extern CFStringRef kFigQuickTimeMetadata_PixelDensityKey_HeightPixels;
+//extern CFStringRef kFigQuickTimeMetadata_PixelDensityKey_WidthPoints;
+//extern CFStringRef kFigQuickTimeMetadata_PixelDensityKey_HeightPoints;
+
+// Lie and call them NSStrings.. they're toll free bridged... right? =/
+extern const NSString *kFigQuickTimeMetadataKey_PixelDensity;
+extern const NSString *kFigMetadataBaseDataType_PixelDensity;
+extern const NSString *kFigQuickTimeMetadata_PixelDensityKey_WidthPixels;
+extern const NSString *kFigQuickTimeMetadata_PixelDensityKey_HeightPixels;
+extern const NSString *kFigQuickTimeMetadata_PixelDensityKey_WidthPoints;
+extern const NSString *kFigQuickTimeMetadata_PixelDensityKey_HeightPoints;
+
+
 @implementation ViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-//    [self screenRecording:[NSURL URLWithString:@"file:///tmp/dump.m4v"]];
-    // Do any additional setup after loading the view.
+    NSLog(@"kFigQuickTimeMetadataKey_PixelDensity: %@", kFigQuickTimeMetadataKey_PixelDensity);
+    NSLog(@"kFigMetadataBaseDataType_PixelDensity: %@", kFigMetadataBaseDataType_PixelDensity);
+    NSLog(@"kFigQuickTimeMetadata_PixelDensityKey_WidthPixels: %@", kFigQuickTimeMetadata_PixelDensityKey_WidthPixels);
+    NSLog(@"kFigQuickTimeMetadata_PixelDensityKey_HeightPixels: %@", kFigQuickTimeMetadata_PixelDensityKey_HeightPixels);
+    NSLog(@"kFigQuickTimeMetadata_PixelDensityKey_WidthPoints: %@", kFigQuickTimeMetadata_PixelDensityKey_WidthPoints);
+    NSLog(@"kFigQuickTimeMetadata_PixelDensityKey_HeightPoints: %@", kFigQuickTimeMetadata_PixelDensityKey_HeightPoints);
+    self.dpiMeta = AVMutableMetadataItem.alloc.init;
+    NSLog(@"dpiMeta blank: %@", self.dpiMeta);
+    self.dpiMeta.keySpace = AVMetadataKeySpaceQuickTimeMetadata;
+    self.dpiMeta.key = kFigQuickTimeMetadataKey_PixelDensity;
+    self.dpiMeta.dataType = kFigMetadataBaseDataType_PixelDensity;
+    NSLog(@"dpiMeta: %@", self.dpiMeta);
 }
 
 - (void)viewWillDisappear {
     [super viewWillDisappear];
-//    [self finishRecord:<#(NSTimer *)#>]
 }
 
 CMTime CMTimeFromMachAbsoluteTime(uint64_t t) {
@@ -129,10 +153,25 @@ void compCb(void *outputCallbackRefCon, void *sourceFrameRefCon, OSStatus status
         videoWriter = [[AVAssetWriter alloc] initWithURL:m4v_url fileType:AVFileTypeQuickTimeMovie error:&error];
         NSParameterAssert(videoWriter);
 
+        self->dpiScale = l.contentsScale;
+        self->logicalWidth = (int)w.frame.size.width;
+        self->logicalHeight = (int)w.frame.size.height;
+        self->realWidth = (int)(w.frame.size.width * self->dpiScale);
+        self->realHeight = (int)(w.frame.size.height * self->dpiScale);
+
+        self.dpiMeta.value = @{
+            kFigQuickTimeMetadata_PixelDensityKey_WidthPixels:  @(self->realWidth),
+            kFigQuickTimeMetadata_PixelDensityKey_HeightPixels: @(self->realHeight),
+            kFigQuickTimeMetadata_PixelDensityKey_WidthPoints:  @(self->logicalWidth),
+            kFigQuickTimeMetadata_PixelDensityKey_HeightPoints: @(self->logicalHeight),
+        };
+        NSLog(@"dpiMeta: %@", self.dpiMeta);
+        videoWriter.metadata = [videoWriter.metadata arrayByAddingObject:self.dpiMeta];
+
         NSDictionary *videoSettings = @{
             AVVideoCodecKey: AVVideoCodecTypeH264,
-            AVVideoWidthKey: @(w.frame.size.width*2),
-            AVVideoHeightKey: @(w.frame.size.height*2),
+            AVVideoWidthKey: @(self->realWidth),
+            AVVideoHeightKey: @(self->realHeight),
         };
         writerInput = [AVAssetWriterInput
             assetWriterInputWithMediaType:AVMediaTypeVideo
@@ -203,8 +242,8 @@ void compCb(void *outputCallbackRefCon, void *sourceFrameRefCon, OSStatus status
             VTEncodeInfoFlags infoFlagsOut;
             OSStatus compFrameStatus = VTCompressionSessionEncodeFrame(self->csref, pbref, my_time, kCMTimeInvalid, (__bridge CFDictionaryRef)frameProps, pbref, &infoFlagsOut);
             NSLog(@"VTCompressionSessionEncodeFrame: %d flags: 0x%x", compFrameStatus, infoFlagsOut);
-//            NSImage *img3 = fromIOSurface(frameSurface);
-//            saveImage_atPath(img3, @"dump3.png");
+            NSImage *img3 = fromIOSurface(frameSurface);
+            saveImage_atPath(img3, @"dump3.png");
         });
         CGDisplayStreamStart(dsref);
         NSLog(@"dsref: %@", dsref);

@@ -178,23 +178,6 @@ void compCb(void *outputCallbackRefCon, void *sourceFrameRefCon, OSStatus status
         NSLog(@"view: %@ wantsLayer: %d wantsUpdateLayer: %d", v, v.wantsLayer, v.wantsUpdateLayer);
         CALayer *l = v.layer;
         NSLog(@"layer: %@", l);
-//        NSView *v2 = [l NS_view];
-//        NSLog(@"v2: %@ wantsUpdateLayer: %d", v2, v2.wantsUpdateLayer);
-//        CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-//        CGContextRef ctx = CGBitmapContextCreate(NULL, v.bounds.size.width, v.bounds.size.height, 8, 0, colorSpace, kCGBitmapByteOrderDefault | kCGImageAlphaNoneSkipLast);
-//        CGC
-//        NSGraphicsContext* currentContext = [NSGraphicsContext currentContext];
-//        NSGraphicsContext *graphicsContext = [NSGraphicsContext graphicsContextWithCGContext:ctx flipped:NO];
-//        [NSGraphicsContext setCurrentContext:graphicsContext];
-//        [l drawInContext:ctx];
-//        [NSGraphicsContext setCurrentContext:currentContext];
-//        CGColorSpaceRelease(colorSpace);
-//        NSLog(@"cgcontext: %@", ctx);
-//        NSImage *img = fromContext(ctx);
-//        NSImage *img = v.imageRepresentation;
-//        saveImage_atPath(img, @"dump.png");
-//        NSImage *img2 = [[NSImage alloc] initByReferencingFile:@"/Users/jevin/Downloads/ehzp1c3t.png"];
-//        saveImage_atPath(img2, @"dump2.png");
 
         NSLog(@"wild begin");
 

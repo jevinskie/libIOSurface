@@ -184,9 +184,12 @@ void compCb(void *outputCallbackRefCon, void *sourceFrameRefCon, OSStatus status
         NSLog(@"wild begin");
 
         NSError *error = nil;
-        videoWriter = [[AVAssetWriter alloc] initWithURL:
-            [NSURL fileURLWithPath:@"/tmp/dump.m4v"] fileType:AVFileTypeQuickTimeMovie
-            error:&error];
+        NSURL *m4v_url = [NSURL fileURLWithPath:@"/tmp/dump.m4v"];
+        if ([NSFileManager.defaultManager fileExistsAtPath:m4v_url.path]) {
+            [NSFileManager.defaultManager removeItemAtPath:m4v_url.path  error:&error];
+            assert(!error);
+        }
+        videoWriter = [[AVAssetWriter alloc] initWithURL:m4v_url fileType:AVFileTypeQuickTimeMovie error:&error];
         NSParameterAssert(videoWriter);
 
         NSDictionary *videoSettings = @{

@@ -161,11 +161,12 @@ void saveImage_atPath(NSImage *image, NSString *path) {
 
 void compCb(void *outputCallbackRefCon, void *sourceFrameRefCon, OSStatus status, VTEncodeInfoFlags infoFlags, CMSampleBufferRef sampleBuffer) {
     NSLog(@"compCb");
-    AVAssetWriterInput* writerInput = (__bridge AVAssetWriterInput*)outputCallbackRefCon;
+    ViewController *self = (__bridge ViewController*)outputCallbackRefCon;
+//    AVAssetWriterInput* writerInput = (__bridge AVAssetWriterInput*)outputCallbackRefCon;
     CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer( sampleBuffer );
     NSLog(@"compPb pixelBuffer: %@", pixelBuffer);
     NSLog(@"compPb sampleBuffer: %@", sampleBuffer);
-    [writerInput appendSampleBuffer:sampleBuffer];
+    [self->writerInput appendSampleBuffer:sampleBuffer];
 }
 
 
@@ -206,7 +207,7 @@ void compCb(void *outputCallbackRefCon, void *sourceFrameRefCon, OSStatus status
 
         NSDictionary *encSpec = @{};
         NSDictionary *srcImgAttr = @{};
-        OSStatus oss = VTCompressionSessionCreate(NULL, v.bounds.size.width, v.bounds.size.height, kCMVideoCodecType_H264, (__bridge CFDictionaryRef _Nullable)(encSpec), (__bridge CFDictionaryRef _Nullable)(srcImgAttr), NULL, compCb, (__bridge void * _Nullable)(writerInput), &csref);
+        OSStatus oss = VTCompressionSessionCreate(NULL, v.bounds.size.width, v.bounds.size.height, kCMVideoCodecType_H264, (__bridge CFDictionaryRef _Nullable)(encSpec), (__bridge CFDictionaryRef _Nullable)(srcImgAttr), NULL, compCb, (__bridge void * _Nullable)(self), &csref);
         NSLog(@"VTCompressionSessionCreate: %d", oss);
         NSLog(@"csref: %@", csref);
         VTCompressionSessionPrepareToEncodeFrames(csref);

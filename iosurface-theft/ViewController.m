@@ -15,12 +15,19 @@
 @property NSView *NS_view;
 @end
 
+typedef uint32_t CGConnectionID;
+
 CGDisplayStreamRef _Nullable
 SLSHWCaptureStreamCreateWithWindow(CGWindowID wid,
                                    uint32_t /*CGSWindowCaptureOptions*/ options,
                                    CFDictionaryRef properties,
                                    dispatch_queue_t _Nullable queue,
                                    CGDisplayStreamFrameAvailableHandler handler);
+
+CGConnectionID SLSMainConnectionID(void);
+
+CGError CGSGetWindowResolution(CGConnectionID cid, CGWindowID wid,
+                                         CGFloat * _Nonnull resolution, CGSize * _Nullable size);
 
 static const uint32_t kSLSCaptureAllowNonIntersectingWindows = (uint32_t)0x8000;
 static const uint32_t kSLSCaptureDisablePromptingValue = (uint32_t)0x10000;
@@ -39,86 +46,6 @@ static const uint32_t kSLSWorkspaceWindowsDoNotFilterDesktopPictureWindows = (ui
 - (void)viewWillDisappear {
     [super viewWillDisappear];
 //    [self finishRecord:<#(NSTimer *)#>]
-}
-
--(void)screenRecording:(NSURL *)destPath
-{
-    // Create a capture session
-    mSession = [[AVCaptureSession alloc] init];
-
-    // Set the session preset as you wish
-    mSession.sessionPreset = AVCaptureSessionPreset1920x1080;
-
-    // If you're on a multi-display system and you want to capture a secondary display,
-    // you can call CGGetActiveDisplayList() to get the list of all active displays.
-    // For this example, we just specify the main display.
-    // To capture both a main and secondary display at the same time, use two active
-    // capture sessions, one for each display. On Mac OS X, AVCaptureMovieFileOutput
-    // only supports writing to a single video track.
-    CGDirectDisplayID displayId = kCGDirectMainDisplay;
-
-    // Create a ScreenInput with the display and add it to the session
-    AVCaptureScreenInput *input = [[AVCaptureScreenInput alloc] initWithDisplayID:displayId];
-    if (!input) {
-        mSession = nil;
-        return;
-    }
-    if ([mSession canAddInput:input])
-        [mSession addInput:input];
-
-    // Create a MovieFileOutput and add it to the session
-    mMovieFileOutput = [[AVCaptureMovieFileOutput alloc] init];
-    if ([mSession canAddOutput:mMovieFileOutput])
-        [mSession addOutput:mMovieFileOutput];
-
-    // Start running the session
-    [mSession startRunning];
-
-    // Delete any existing movie file first
-    if ([[NSFileManager defaultManager] fileExistsAtPath:[destPath path]])
-    {
-        NSError *err;
-        if (![[NSFileManager defaultManager] removeItemAtPath:[destPath path] error:&err])
-        {
-            NSLog(@"Error deleting existing movie %@",[err localizedDescription]);
-        }
-    }
-
-    // Start recording to the destination movie file
-    // The destination path is assumed to end with ".mov", for example, @"/users/master/desktop/capture.mov"
-    // Set the recording delegate to self
-    [mMovieFileOutput startRecordingToOutputFileURL:destPath recordingDelegate:self];
-
-    // Fire a timer in 5 seconds
-    mTimer = [NSTimer scheduledTimerWithTimeInterval:5 target:self selector:@selector(finishRecord:) userInfo:nil repeats:NO];
-}
-
--(void)finishRecord:(NSTimer *)timer
-{
-    // Stop recording to the destination movie file
-    [mMovieFileOutput stopRecording];
-
-    mTimer = nil;
-}
-
-// AVCaptureFileOutputRecordingDelegate methods
-
-- (void)captureOutput:(AVCaptureFileOutput *)captureOutput didFinishRecordingToOutputFileAtURL:(NSURL *)outputFileURL fromConnections:(NSArray *)connections error:(NSError *)error
-{
-    assert(!"nope dont call me");
-    NSLog(@"Did finish recording to %@ due to error %@", [outputFileURL description], [error description]);
-    CGDisplayStreamStop(dsref);
-    [mSession stopRunning];
-
-    OSStatus finStatus = VTCompressionSessionCompleteFrames(csref, kCMTimeInvalid);
-    NSLog(@"finStatus: %d", finStatus);
-    VTCompressionSessionInvalidate(csref);
-    CFRelease(csref);
-    // Stop running the session
-//    [mSession stopRunning];
-
-    // Release the session
-    mSession = nil;
 }
 
 CMTime CMTimeFromMachAbsoluteTime(uint64_t t) {
@@ -160,20 +87,30 @@ void saveImage_atPath(NSImage *image, NSString *path) {
 }
 
 void compCb(void *outputCallbackRefCon, void *sourceFrameRefCon, OSStatus status, VTEncodeInfoFlags infoFlags, CMSampleBufferRef sampleBuffer) {
-    NSLog(@"compCb");
+    NSLog(@"compCb status: %d infoFlags: 0x%x", (int)status, infoFlags);
     ViewController *self = (__bridge ViewController*)outputCallbackRefCon;
+    CVPixelBufferRef pbref = (CVBufferRef)sourceFrameRefCon;
+    NSLog(@"origPb pixelBuffer: %@", pbref);
 //    AVAssetWriterInput* writerInput = (__bridge AVAssetWriterInput*)outputCallbackRefCon;
-    CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer( sampleBuffer );
-    NSLog(@"compPb pixelBuffer: %@", pixelBuffer);
+//    CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
+//    CMBlockBufferRef blockBuffer = CMSampleBufferGetDataBuffer(sampleBuffer);
+//    size_t blockBufferLen = CMBlockBufferGetDataLength(blockBuffer);
+//    size_t lo = 243;
+//    size_t tlo = 244;
+//    char *dbo = NULL;
+//    OSStatus bbps = CMBlockBufferGetDataPointer(blockBuffer, 0, &lo, &tlo, &dbo);
+//    NSLog(@"compPb pixelBuffer: %@", pixelBuffer);
     NSLog(@"compPb sampleBuffer: %@", sampleBuffer);
+//    NSLog(@"compPb blockBuffer: sz: %zu bbps: %d lo: %zu tlo: %zu dbo: %p %@", blockBufferLen, (int)bbps, lo, tlo, dbo, blockBuffer);
     [self->writerInput appendSampleBuffer:sampleBuffer];
 }
 
 
 - (IBAction)captureClicked:(id)sender {
+    CGError cge;
     NSLog(@"sender: %@", sender);
     for (NSWindow *w in NSApplication.sharedApplication.windows) {
-        NSLog(@"window: %@ wid: %ld", w, (long)w.windowNumber);
+        NSLog(@"window: %@ w: %f h: %f wid: %ld", w, w.frame.size.width, w.frame.size.height, (long)w.windowNumber);
         NSView *v = w.contentView;
         NSLog(@"view: %@ wantsLayer: %d wantsUpdateLayer: %d", v, v.wantsLayer, v.wantsUpdateLayer);
 //        v.wantsLayer = YES;
@@ -184,7 +121,7 @@ void compCb(void *outputCallbackRefCon, void *sourceFrameRefCon, OSStatus status
         NSLog(@"wild begin");
 
         NSError *error = nil;
-        NSURL *m4v_url = [NSURL fileURLWithPath:@"/tmp/dump.m4v"];
+        NSURL *m4v_url = [NSURL fileURLWithPath:@"/tmp/dump.mov"];
         if ([NSFileManager.defaultManager fileExistsAtPath:m4v_url.path]) {
             [NSFileManager.defaultManager removeItemAtPath:m4v_url.path  error:&error];
             assert(!error);
@@ -194,12 +131,12 @@ void compCb(void *outputCallbackRefCon, void *sourceFrameRefCon, OSStatus status
 
         NSDictionary *videoSettings = @{
             AVVideoCodecKey: AVVideoCodecTypeH264,
-            AVVideoWidthKey: @(v.bounds.size.width),
-            AVVideoHeightKey: @(v.bounds.size.height),
+            AVVideoWidthKey: @(w.frame.size.width*2),
+            AVVideoHeightKey: @(w.frame.size.height*2),
         };
         writerInput = [AVAssetWriterInput
             assetWriterInputWithMediaType:AVMediaTypeVideo
-                                           outputSettings:videoSettings];
+                                           outputSettings:nil];
 
         NSParameterAssert(writerInput);
         NSParameterAssert([videoWriter canAddInput:writerInput]);
@@ -210,7 +147,7 @@ void compCb(void *outputCallbackRefCon, void *sourceFrameRefCon, OSStatus status
 
         NSDictionary *encSpec = @{};
         NSDictionary *srcImgAttr = @{};
-        OSStatus oss = VTCompressionSessionCreate(NULL, v.bounds.size.width, v.bounds.size.height, kCMVideoCodecType_H264, (__bridge CFDictionaryRef _Nullable)(encSpec), (__bridge CFDictionaryRef _Nullable)(srcImgAttr), NULL, compCb, (__bridge void * _Nullable)(self), &csref);
+        OSStatus oss = VTCompressionSessionCreate(NULL, (int32_t)w.frame.size.width*2, (int32_t)w.frame.size.height*2, kCMVideoCodecType_H264, (__bridge CFDictionaryRef _Nullable)(encSpec), (__bridge CFDictionaryRef _Nullable)(srcImgAttr), NULL, compCb, (__bridge void * _Nullable)(self), &csref);
         NSLog(@"VTCompressionSessionCreate: %d", oss);
         NSLog(@"csref: %@", csref);
         VTCompressionSessionPrepareToEncodeFrames(csref);
@@ -221,11 +158,17 @@ void compCb(void *outputCallbackRefCon, void *sourceFrameRefCon, OSStatus status
 //        [captureSession addInput:si];
 //        [captureSession startRunning];
 //        NSLog(@"did: 0x%x si: %@", did, si);
+        CGFloat resolution;
+        CGConnectionID cid = SLSMainConnectionID();
+        CGWindowID wid = (CGWindowID)w.windowNumber;
+        cge = CGSGetWindowResolution(cid, wid, &resolution, NULL);
+        NSLog(@"cge: %d cid: 0x%08x wid: 0x%08x resolution: %f", cge, cid, wid, resolution);
         NSDictionary *dsprops = @{};
 //        dispatch_queue_t dsq = dispatch_queue_create("iosurface-theft-dsq", DISPATCH_QUEUE_SERIAL);
 //        dispatch_resume(dsq);
-        dsref = SLSHWCaptureStreamCreateWithWindow((CGWindowID)w.windowNumber, kSLSCaptureDisablePromptingValue | kSLSCaptureIgnoreTCCPermissionsValue, (__bridge CFDictionaryRef)(dsprops), dispatch_get_main_queue(), ^(CGDisplayStreamFrameStatus status, uint64_t displayTime, IOSurfaceRef  _Nullable frameSurface, CGDisplayStreamUpdateRef  _Nullable updateRef) {
-            NSLog(@"callback lol surface: %@ update: %@", frameSurface, updateRef);
+        dsref = SLSHWCaptureStreamCreateWithWindow((CGWindowID)w.windowNumber, 0, (__bridge CFDictionaryRef)(dsprops), dispatch_get_main_queue(), ^(CGDisplayStreamFrameStatus status, uint64_t displayTime, IOSurfaceRef  _Nullable frameSurface, CGDisplayStreamUpdateRef  _Nullable updateRef) {
+            IOSurface *fs = (__bridge IOSurface*)frameSurface;
+            NSLog(@"callback lol surface: %@ w: %ld h: %ld attachments: %@, update: %@", fs, (long)fs.width, (long)fs.height, fs.allAttachments, updateRef);
             NSDictionary *pbAttr = @{};
             CVPixelBufferRef pbref;
             CVReturn pbres = CVPixelBufferCreateWithIOSurface(NULL, frameSurface, (__bridge CFDictionaryRef _Nullable)(pbAttr), &pbref);
@@ -236,10 +179,10 @@ void compCb(void *outputCallbackRefCon, void *sourceFrameRefCon, OSStatus status
             NSLog(@"pbres: %d pbref: %@", pbres, pbref);
             NSDictionary *frameProps = @{};
             VTEncodeInfoFlags infoFlagsOut;
-            OSStatus compFrameStatus = VTCompressionSessionEncodeFrame(self->csref, pbref, CMTimeFromMachAbsoluteTime(displayTime), kCMTimeInvalid, (__bridge CFDictionaryRef)frameProps, NULL, &infoFlagsOut);
+            OSStatus compFrameStatus = VTCompressionSessionEncodeFrame(self->csref, pbref, CMTimeFromMachAbsoluteTime(displayTime), kCMTimeInvalid, (__bridge CFDictionaryRef)frameProps, pbref, &infoFlagsOut);
             NSLog(@"VTCompressionSessionEncodeFrame: %d flags: 0x%x", compFrameStatus, infoFlagsOut);
-//            NSImage *img3 = fromIOSurface(frameSurface);
-//            saveImage_atPath(img3, @"dump3.png");
+            NSImage *img3 = fromIOSurface(frameSurface);
+            saveImage_atPath(img3, @"dump3.png");
         });
         CGDisplayStreamStart(dsref);
         NSLog(@"dsref: %@", dsref);
@@ -259,9 +202,12 @@ void compCb(void *outputCallbackRefCon, void *sourceFrameRefCon, OSStatus status
     VTCompressionSessionInvalidate(csref);
     CFRelease(csref);
     [writerInput markAsFinished];
+    [videoWriter endSessionAtSourceTime:CMTimeFromMachAbsoluteTime(mach_absolute_time())];
 //    [videoWriter endSessionAtSourceTime:…]; //optional can call finishWriting without specifying endTime
     [videoWriter finishWritingWithCompletionHandler:^{
         NSLog(@"finished writing video");
+        NSLog(@"videoWriter.status: %ld", (long)self->videoWriter.status);
+        NSLog(@"videoWriter.error: %@", self->videoWriter.error);
     }];
     mTimer = nil;
 }

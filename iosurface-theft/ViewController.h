@@ -8,7 +8,7 @@
 #import <Cocoa/Cocoa.h>
 #import <VideoToolbox/VideoToolbox.h>
 
-@interface ViewController : NSViewController <AVCaptureFileOutputRecordingDelegate> {
+@interface ViewController : NSViewController {
     AVCaptureSession *mSession;
     AVCaptureMovieFileOutput *mMovieFileOutput;
     NSTimer *mTimer;

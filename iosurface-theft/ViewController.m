@@ -105,6 +105,7 @@ static const uint32_t kSLSWorkspaceWindowsDoNotFilterDesktopPictureWindows = (ui
 
 - (void)captureOutput:(AVCaptureFileOutput *)captureOutput didFinishRecordingToOutputFileAtURL:(NSURL *)outputFileURL fromConnections:(NSArray *)connections error:(NSError *)error
 {
+    assert(!"nope dont call me");
     NSLog(@"Did finish recording to %@ due to error %@", [outputFileURL description], [error description]);
     CGDisplayStreamStop(dsref);
     [mSession stopRunning];
@@ -225,6 +226,7 @@ void compCb(void *outputCallbackRefCon, void *sourceFrameRefCon, OSStatus status
             CVPixelBufferRef pbref;
             CVReturn pbres = CVPixelBufferCreateWithIOSurface(NULL, frameSurface, (__bridge CFDictionaryRef _Nullable)(pbAttr), &pbref);
             if (pbres) {
+                NSLog(@"bad pbres: %d\n", pbres);
                 return;
             }
             NSLog(@"pbres: %d pbref: %@", pbres, pbref);

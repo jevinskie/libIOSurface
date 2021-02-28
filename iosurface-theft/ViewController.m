@@ -187,11 +187,11 @@ void compCb(void *outputCallbackRefCon, void *sourceFrameRefCon, OSStatus status
             error:&error];
         NSParameterAssert(videoWriter);
 
-        NSDictionary *videoSettings = [NSDictionary dictionaryWithObjectsAndKeys:
-                                       AVVideoCodecTypeH264, AVVideoCodecKey,
-            [NSNumber numberWithInt:v.bounds.size.width], AVVideoWidthKey,
-            [NSNumber numberWithInt:v.bounds.size.height], AVVideoHeightKey,
-            nil];
+        NSDictionary *videoSettings = @{
+            AVVideoCodecKey: AVVideoCodecTypeH264,
+            AVVideoWidthKey: @(v.bounds.size.width),
+            AVVideoHeightKey: @(v.bounds.size.height),
+        };
         writerInput = [AVAssetWriterInput
             assetWriterInputWithMediaType:AVMediaTypeVideo
                                            outputSettings:videoSettings];

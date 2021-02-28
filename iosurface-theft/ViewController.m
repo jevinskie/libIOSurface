@@ -161,6 +161,9 @@ void saveImage_atPath(NSImage *image, NSString *path) {
 void compCb(void *outputCallbackRefCon, void *sourceFrameRefCon, OSStatus status, VTEncodeInfoFlags infoFlags, CMSampleBufferRef sampleBuffer) {
     NSLog(@"compCb");
     AVAssetWriterInput* writerInput = (__bridge AVAssetWriterInput*)outputCallbackRefCon;
+    CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer( sampleBuffer );
+    NSLog(@"compPb pixelBuffer: %@", pixelBuffer);
+    NSLog(@"compPb sampleBuffer: %@", sampleBuffer);
     [writerInput appendSampleBuffer:sampleBuffer];
 }
 

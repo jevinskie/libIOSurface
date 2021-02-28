@@ -143,7 +143,26 @@ void compCb(void *outputCallbackRefCon, void *sourceFrameRefCon, OSStatus status
         [videoWriter addInput:writerInput];
 
         [videoWriter startWriting];
-        [videoWriter startSessionAtSourceTime:CMTimeFromMachAbsoluteTime(mach_absolute_time())];
+
+//        [videoWriter startSessionAtSourceTime:CMTimeFromMachAbsoluteTime(mach_absolute_time())];
+
+        CMClockRef hc = CMClockGetHostTimeClock();
+        NSLog(@"CMClockGetHostTimeClock() = %@", hc);
+        OSStatus tbcs = CMTimebaseCreateWithMasterClock(NULL, hc, &tb);
+        assert(!tbcs);
+        assert(tb);
+        NSLog(@"tb: %@", tb);
+        OSStatus tbsrs = CMTimebaseSetRateAndAnchorTime(tb, 1.0, kCMTimeZero, CMClockMakeHostTimeFromSystemUnits(mach_absolute_time()));
+        assert(!tbsrs);
+        NSLog(@"tb: %@", tb);
+//        CMTimebaseSetAnchorTime(tb, kCMTimeZero, CMSyncGetTime(CMTimebaseCopyMaster(tb)));
+//        CMTimebaseSetTime(tb, CMClockGetTime(CMClockGetHostTimeClock()));
+        CMTime now = CMTimebaseGetTime(tb);
+        NSLog(@"now: numer: %lld denom: %d", now.value, now.timescale);
+        usleep(1000*100);
+        now = CMTimebaseGetTime(tb);
+        NSLog(@"now: numer: %lld denom: %d", now.value, now.timescale);
+        [videoWriter startSessionAtSourceTime:CMTimebaseGetTime(tb)];
 
         NSDictionary *encSpec = @{};
         NSDictionary *srcImgAttr = @{};
@@ -178,11 +197,14 @@ void compCb(void *outputCallbackRefCon, void *sourceFrameRefCon, OSStatus status
             }
             NSLog(@"pbres: %d pbref: %@", pbres, pbref);
             NSDictionary *frameProps = @{};
+            CMTime ht = CMClockMakeHostTimeFromSystemUnits(displayTime);
+            CMTime my_time = CMSyncConvertTime(ht, CMClockGetHostTimeClock(), self->tb);
+            NSLog(@"my_time numer: %lld denom: %d", my_time.value, my_time.timescale);
             VTEncodeInfoFlags infoFlagsOut;
-            OSStatus compFrameStatus = VTCompressionSessionEncodeFrame(self->csref, pbref, CMTimeFromMachAbsoluteTime(displayTime), kCMTimeInvalid, (__bridge CFDictionaryRef)frameProps, pbref, &infoFlagsOut);
+            OSStatus compFrameStatus = VTCompressionSessionEncodeFrame(self->csref, pbref, my_time, kCMTimeInvalid, (__bridge CFDictionaryRef)frameProps, pbref, &infoFlagsOut);
             NSLog(@"VTCompressionSessionEncodeFrame: %d flags: 0x%x", compFrameStatus, infoFlagsOut);
-            NSImage *img3 = fromIOSurface(frameSurface);
-            saveImage_atPath(img3, @"dump3.png");
+//            NSImage *img3 = fromIOSurface(frameSurface);
+//            saveImage_atPath(img3, @"dump3.png");
         });
         CGDisplayStreamStart(dsref);
         NSLog(@"dsref: %@", dsref);

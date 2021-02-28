@@ -18,6 +18,7 @@
     VTCompressionSessionRef csref;
     AVAssetWriter *videoWriter;
     AVAssetWriterInput* writerInput;
+    CMTimebaseRef tb;
 }
 
 @property (weak) IBOutlet NSButton *captureButton;

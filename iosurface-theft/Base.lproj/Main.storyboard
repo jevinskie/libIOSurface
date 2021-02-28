@@ -729,6 +729,10 @@
                                     <action selector="captureClicked:" target="XfG-lQ-9wD" id="O81-Ew-ClF"/>
                                 </connections>
                             </button>
+                            <switch horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" baseWritingDirection="leftToRight" alignment="left" translatesAutoresizingMaskIntoConstraints="NO" id="owV-px-FcM">
+                                <rect key="frame" x="219" y="60" width="42" height="25"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                            </switch>
                         </subviews>
                     </view>
                     <connections>

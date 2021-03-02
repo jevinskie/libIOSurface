@@ -136,27 +136,21 @@ void compCb(void *outputCallbackRefCon, void *sourceFrameRefCon, OSStatus status
     CMFormatDescriptionRef fdref = CMSampleBufferGetFormatDescription(sampleBuffer);
 //    NSLog(@"fdref: %@", fdref);
 
-    const uint8_t *sps = NULL;
-    size_t sps_sz = 0;
-    size_t sps_cnt = 0;
-    int sps_nal_hdr_len = 0;
-    OSStatus spsres = CMVideoFormatDescriptionGetH264ParameterSetAtIndex(fdref, 0, &sps, &sps_sz, &sps_cnt, &sps_nal_hdr_len);
-    NSLog(@"spsres: %d sps: %p sps_sz: %zu sps_cnt: %zu sps_nal_hdr_len: %d", spsres, sps, sps_sz, sps_cnt, sps_nal_hdr_len);
+    size_t ps_cnt = 0;
+    OSStatus psres = CMVideoFormatDescriptionGetH264ParameterSetAtIndex(fdref, 0, NULL, NULL, &ps_cnt, NULL);
+    assert(!psres);
+    NSLog(@"ps_cnt: %zu psres: %d", ps_cnt, psres);
 
-    if (!spsres) {
+    for (size_t psi = 0; psi < ps_cnt; ++psi) {
+        const uint8_t *psb = NULL;
+        size_t psb_sz = 0;
+        int psb_nal_hdr_len = 0;
+        psres = CMVideoFormatDescriptionGetH264ParameterSetAtIndex(fdref, psi, &psb, &psb_sz, NULL, &psb_nal_hdr_len);
+        NSLog(@"psres: %d psi: %zu psb: %p psb_sz: %zu psb_nal_hdr_len: %d", psres, psi, psb, psb_sz, psb_nal_hdr_len);
+        assert(!psres);
+        assert(psb_nal_hdr_len == 4);
         [self.os write:nalu_hdr maxLength:sizeof(nalu_hdr)];
-        [self.os write:sps maxLength:sps_sz];
-        const uint8_t *pps = NULL;
-        size_t pps_sz = 0;
-        size_t pps_cnt = 0;
-        int pps_nal_hdr_len = 0;
-        OSStatus ppsres = CMVideoFormatDescriptionGetH264ParameterSetAtIndex(fdref, 1, &pps, &pps_sz, &pps_cnt, &pps_nal_hdr_len);
-        NSLog(@"ppsres: %d pps: %p pps_sz: %zu pps_cnt: %zu pps_nal_hdr_len: %d", ppsres, pps, pps_sz, pps_cnt, pps_nal_hdr_len);
-
-        if (!ppsres) {
-            [self.os write:nalu_hdr maxLength:sizeof(nalu_hdr)];
-            [self.os write:pps maxLength:pps_sz];
-        }
+        [self.os write:psb maxLength:psb_sz];
     }
 
 

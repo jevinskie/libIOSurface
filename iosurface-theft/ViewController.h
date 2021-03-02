@@ -28,6 +28,7 @@
 
 @property (weak) IBOutlet NSButton *captureButton;
 @property AVMutableMetadataItem *dpiMeta;
+@property NSOutputStream *os;
 
 @end
 

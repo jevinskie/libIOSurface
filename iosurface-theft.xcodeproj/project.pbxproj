@@ -15,6 +15,7 @@
 		0992BCA025E9D5AD00D1B7B0 /* NSView+ImageRepresentation.m in Sources */ = {isa = PBXBuildFile; fileRef = 0992BC9F25E9D5AD00D1B7B0 /* NSView+ImageRepresentation.m */; };
 		0992BCA425EA06BC00D1B7B0 /* SkyLight.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0992BCA225EA06A100D1B7B0 /* SkyLight.framework */; };
 		0992BCAC25EA3A5800D1B7B0 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 0992BCAB25EA3A5800D1B7B0 /* main.m */; };
+		09E5511225EC735A007F16D0 /* hexdump.c in Sources */ = {isa = PBXBuildFile; fileRef = 09E5511125EC735A007F16D0 /* hexdump.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -46,6 +47,7 @@
 		0992BCA925EA3A5800D1B7B0 /* os_variant_has_internal_diagnostics */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = os_variant_has_internal_diagnostics; sourceTree = BUILT_PRODUCTS_DIR; };
 		0992BCAB25EA3A5800D1B7B0 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		0992BCB025EA3A5B00D1B7B0 /* os_variant_has_internal_diagnostics.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = os_variant_has_internal_diagnostics.entitlements; sourceTree = "<group>"; };
+		09E5511125EC735A007F16D0 /* hexdump.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = hexdump.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -89,6 +91,7 @@
 		0992BC8925E9931400D1B7B0 /* iosurface-theft */ = {
 			isa = PBXGroup;
 			children = (
+				09E5511125EC735A007F16D0 /* hexdump.c */,
 				0992BC8A25E9931400D1B7B0 /* AppDelegate.h */,
 				0992BC8B25E9931400D1B7B0 /* AppDelegate.m */,
 				0992BC8D25E9931400D1B7B0 /* ViewController.h */,
@@ -211,6 +214,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				0992BCA025E9D5AD00D1B7B0 /* NSView+ImageRepresentation.m in Sources */,
+				09E5511225EC735A007F16D0 /* hexdump.c in Sources */,
 				0992BC8F25E9931400D1B7B0 /* ViewController.m in Sources */,
 				0992BC9725E9931400D1B7B0 /* main.m in Sources */,
 				0992BC8C25E9931400D1B7B0 /* AppDelegate.m in Sources */,

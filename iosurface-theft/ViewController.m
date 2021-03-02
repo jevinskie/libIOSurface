@@ -7,6 +7,7 @@
 
 //#import <CoreGraphics/CoreGraphics.h>
 #import <AVFoundation/AVFoundation.h>
+#include <libkern/OSByteOrder.h>
 
 #import "ViewController.h"
 #import "NSView+ImageRepresentation.h"
@@ -15,7 +16,11 @@
 @property NSView *NS_view;
 @end
 
+extern void hexdump(const void *data, size_t len);
+
 typedef uint32_t CGConnectionID;
+
+const uint8_t nalu_hdr[] = {0, 0, 0, 1};
 
 CGDisplayStreamRef _Nullable
 SLSHWCaptureStreamCreateWithWindow(CGWindowID wid,
@@ -114,18 +119,58 @@ void compCb(void *outputCallbackRefCon, void *sourceFrameRefCon, OSStatus status
     NSLog(@"compCb status: %d infoFlags: 0x%x", (int)status, infoFlags);
     ViewController *self = (__bridge ViewController*)outputCallbackRefCon;
     CVPixelBufferRef pbref = (CVBufferRef)sourceFrameRefCon;
-    NSLog(@"origPb pixelBuffer: %@", pbref);
+//    NSLog(@"origPb pixelBuffer: %@", pbref);
 //    AVAssetWriterInput* writerInput = (__bridge AVAssetWriterInput*)outputCallbackRefCon;
-//    CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
-//    CMBlockBufferRef blockBuffer = CMSampleBufferGetDataBuffer(sampleBuffer);
-//    size_t blockBufferLen = CMBlockBufferGetDataLength(blockBuffer);
-//    size_t lo = 243;
-//    size_t tlo = 244;
-//    char *dbo = NULL;
-//    OSStatus bbps = CMBlockBufferGetDataPointer(blockBuffer, 0, &lo, &tlo, &dbo);
+    CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
+    CMBlockBufferRef blockBuffer = CMSampleBufferGetDataBuffer(sampleBuffer);
+    size_t blockBufferLen = CMBlockBufferGetDataLength(blockBuffer);
+    size_t lo = 243;
+    size_t tlo = 244;
+    char *dbo = NULL;
+    OSStatus bbps = CMBlockBufferGetDataPointer(blockBuffer, 0, &lo, &tlo, &dbo);
 //    NSLog(@"compPb pixelBuffer: %@", pixelBuffer);
     NSLog(@"compPb sampleBuffer: %@", sampleBuffer);
-//    NSLog(@"compPb blockBuffer: sz: %zu bbps: %d lo: %zu tlo: %zu dbo: %p %@", blockBufferLen, (int)bbps, lo, tlo, dbo, blockBuffer);
+    NSLog(@"compPb blockBuffer: sz: %zu bbps: %d lo: %zu tlo: %zu dbo: %p %@", blockBufferLen, (int)bbps, lo, tlo, dbo, blockBuffer);
+    hexdump(dbo, MIN(blockBufferLen, 128));
+
+    CMFormatDescriptionRef fdref = CMSampleBufferGetFormatDescription(sampleBuffer);
+//    NSLog(@"fdref: %@", fdref);
+
+    const uint8_t *sps = NULL;
+    size_t sps_sz = 0;
+    size_t sps_cnt = 0;
+    int sps_nal_hdr_len = 0;
+    OSStatus spsres = CMVideoFormatDescriptionGetH264ParameterSetAtIndex(fdref, 0, &sps, &sps_sz, &sps_cnt, &sps_nal_hdr_len);
+    NSLog(@"spsres: %d sps: %p sps_sz: %zu sps_cnt: %zu sps_nal_hdr_len: %d", spsres, sps, sps_sz, sps_cnt, sps_nal_hdr_len);
+
+    if (!spsres) {
+        [self.os write:nalu_hdr maxLength:sizeof(nalu_hdr)];
+        [self.os write:sps maxLength:sps_sz];
+        const uint8_t *pps = NULL;
+        size_t pps_sz = 0;
+        size_t pps_cnt = 0;
+        int pps_nal_hdr_len = 0;
+        OSStatus ppsres = CMVideoFormatDescriptionGetH264ParameterSetAtIndex(fdref, 1, &pps, &pps_sz, &pps_cnt, &pps_nal_hdr_len);
+        NSLog(@"ppsres: %d pps: %p pps_sz: %zu pps_cnt: %zu pps_nal_hdr_len: %d", ppsres, pps, pps_sz, pps_cnt, pps_nal_hdr_len);
+
+        if (!ppsres) {
+            [self.os write:nalu_hdr maxLength:sizeof(nalu_hdr)];
+            [self.os write:pps maxLength:pps_sz];
+        }
+    }
+
+
+    const uint8_t *p = (const uint8_t*)dbo;
+    const uint8_t *pe = (const uint8_t*)(dbo + blockBufferLen);
+    while (p < pe) {
+        uint32_t nalu_sz_be;
+        memcpy(&nalu_sz_be, p, sizeof(nalu_sz_be));
+        uint32_t nalu_sz = OSSwapBigToHostInt(nalu_sz_be);
+        NSLog(@"nalu_sz: %u", nalu_sz);
+        [self.os write:nalu_hdr maxLength:sizeof(nalu_hdr)];
+        [self.os write:p + sizeof(nalu_sz) maxLength:nalu_sz];
+        p += sizeof(uint32_t) + nalu_sz;
+    }
     [self->writerInput appendSampleBuffer:sampleBuffer];
 }
 
@@ -145,9 +190,19 @@ void compCb(void *outputCallbackRefCon, void *sourceFrameRefCon, OSStatus status
         NSLog(@"wild begin");
 
         NSError *error = nil;
-        NSURL *m4v_url = [NSURL fileURLWithPath:@"/tmp/dump.mov"];
-        if ([NSFileManager.defaultManager fileExistsAtPath:m4v_url.path]) {
-            [NSFileManager.defaultManager removeItemAtPath:m4v_url.path  error:&error];
+        NSString *h264_path = @"/tmp/dump.h264";
+        NSURL *h264_url = [NSURL fileURLWithPath:h264_path];
+        if ([NSFileManager.defaultManager fileExistsAtPath:h264_path]) {
+            [NSFileManager.defaultManager removeItemAtPath:h264_path error:&error];
+            assert(!error);
+        }
+        self.os = [NSOutputStream outputStreamToFileAtPath:h264_path append:NO];
+        [self.os open];
+
+        NSString *m4v_path = @"/tmp/dump.mov";
+        NSURL *m4v_url = [NSURL fileURLWithPath:m4v_path];
+        if ([NSFileManager.defaultManager fileExistsAtPath:m4v_path]) {
+            [NSFileManager.defaultManager removeItemAtPath:m4v_path error:&error];
             assert(!error);
         }
         videoWriter = [[AVAssetWriter alloc] initWithURL:m4v_url fileType:AVFileTypeQuickTimeMovie error:&error];
@@ -168,11 +223,6 @@ void compCb(void *outputCallbackRefCon, void *sourceFrameRefCon, OSStatus status
         NSLog(@"dpiMeta: %@", self.dpiMeta);
         videoWriter.metadata = [videoWriter.metadata arrayByAddingObject:self.dpiMeta];
 
-        NSDictionary *videoSettings = @{
-            AVVideoCodecKey: AVVideoCodecTypeH264,
-            AVVideoWidthKey: @(self->realWidth),
-            AVVideoHeightKey: @(self->realHeight),
-        };
         writerInput = [AVAssetWriterInput
             assetWriterInputWithMediaType:AVMediaTypeVideo
                                            outputSettings:nil];
@@ -242,8 +292,8 @@ void compCb(void *outputCallbackRefCon, void *sourceFrameRefCon, OSStatus status
             VTEncodeInfoFlags infoFlagsOut;
             OSStatus compFrameStatus = VTCompressionSessionEncodeFrame(self->csref, pbref, my_time, kCMTimeInvalid, (__bridge CFDictionaryRef)frameProps, pbref, &infoFlagsOut);
             NSLog(@"VTCompressionSessionEncodeFrame: %d flags: 0x%x", compFrameStatus, infoFlagsOut);
-            NSImage *img3 = fromIOSurface(frameSurface);
-            saveImage_atPath(img3, @"dump3.png");
+//            NSImage *img3 = fromIOSurface(frameSurface);
+//            saveImage_atPath(img3, @"dump3.png");
         });
         CGDisplayStreamStart(dsref);
         NSLog(@"dsref: %@", dsref);
@@ -270,6 +320,7 @@ void compCb(void *outputCallbackRefCon, void *sourceFrameRefCon, OSStatus status
         NSLog(@"videoWriter.status: %ld", (long)self->videoWriter.status);
         NSLog(@"videoWriter.error: %@", self->videoWriter.error);
     }];
+    [self.os close];
     mTimer = nil;
 }
 

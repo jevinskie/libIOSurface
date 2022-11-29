@@ -2,12 +2,11 @@
 
 @implementation NSView (ImageRepresentation)
 
-- (NSImage *)imageRepresentation
-{
-    BOOL wasHidden = self.isHidden;
+- (NSImage *)imageRepresentation {
+    BOOL wasHidden      = self.isHidden;
     CGFloat wantedLayer = self.wantsLayer;
 
-    self.hidden = NO;
+    self.hidden     = NO;
     self.wantsLayer = YES;
 
     NSImage *image = [NSImage.alloc initWithSize:self.bounds.size];
@@ -17,7 +16,7 @@
     [image unlockFocus];
 
     self.wantsLayer = wantedLayer;
-    self.hidden = wasHidden;
+    self.hidden     = wasHidden;
 
     return image;
 }

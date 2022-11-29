@@ -17,7 +17,7 @@
     AVCaptureScreenInput *si;
     VTCompressionSessionRef csref;
     AVAssetWriter *videoWriter;
-    AVAssetWriterInput* writerInput;
+    AVAssetWriterInput *writerInput;
     CMTimebaseRef tb;
     int realWidth;
     int realHeight;
@@ -26,9 +26,8 @@
     CGFloat dpiScale;
 }
 
-@property (weak) IBOutlet NSButton *captureButton;
+@property(weak) IBOutlet NSButton *captureButton;
 @property AVMutableMetadataItem *dpiMeta;
 @property NSOutputStream *os;
 
 @end
-
